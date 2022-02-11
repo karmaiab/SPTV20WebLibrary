@@ -7,7 +7,7 @@
         <property name="databaseName" value="sptv20weblibrary"/>
         <property name="User" value="sptv20weblibrary"/>
         <property name="Password" value="sptv20weblibrary"/>
-        <property name="URL" value="jdbc:mysql://localhost:3306/sptv20weblibrary?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;chracterEncoding=utf8"/>
+        <property name="URL" value="jdbc:mysql://localhost:3306/sptv20weblibrary?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=utf8"/>
         <property name="driverClass" value="com.mysql.jdbc.Driver"/>
     </jdbc-connection-pool>
     <jdbc-resource enabled="true" jndi-name="java:app/jdbc/sptv20weblibraryDS" object-type="user" pool-name="mysql_sptv20weblibrary_sptv20weblibraryPool"/>
