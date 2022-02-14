@@ -9,6 +9,7 @@ import entity.Author;
 import entity.Book;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -23,12 +24,14 @@ import session.BookFacade;
  *
  * @author user
  */
-@WebServlet(name = "MyServlet", urlPatterns = {
+@WebServlet(name = "MyServlet",loadOnStartup = 1, urlPatterns = {
     "/addAuthor",
     "/createAuthor",
     "/addBook",
     "/createBook",
     "/listBooks"
+
+
 })
 public class MyServlet extends HttpServlet {
     @EJB private AuthorFacade authorFacade;
@@ -47,11 +50,13 @@ public class MyServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
         String path = request.getServletPath();
-        switch (path){
+
+        switch (path) {
             case "/addAuthor":
-                
+                request.setAttribute("activeAddAuthor", true);
                 request.getRequestDispatcher("/WEB-INF/addAuthor.jsp").forward(request, response);
                 break;
+                
             case "/createAuthor":
                 String firstName = request.getParameter("firstName");
                 String lastName = request.getParameter("lastName");
@@ -62,34 +67,91 @@ public class MyServlet extends HttpServlet {
                     request.setAttribute("firstName", firstName);
                     request.setAttribute("lastName", lastName);
                     request.setAttribute("birthYear", birthYear);
-                    request.setAttribute("info", "Year of birth with numbers");
-                request.getRequestDispatcher("addAuthor.jsp").forward(request, response);
-                break;
-                    
+                    request.setAttribute("info", "Заполните все поля");
+                    request.getRequestDispatcher("/addAuthor").forward(request, response);
+                    break;
                 }
                 Author author = new Author();
                 author.setFirstName(firstName);
                 author.setLastName(lastName);
-                author.setBirthYear(Integer.parseInt(birthYear));
+                try{
+                    author.setBirthYear(Integer.parseInt(birthYear));
+                } catch (Exception e) {
+                    request.setAttribute("firstName", firstName);
+                    request.setAttribute("lastName", lastName);
+                    request.setAttribute("birthYear", birthYear);
+                    request.setAttribute("info", "Год рождение запольнить цифрами");
+                    request.getRequestDispatcher("/addAuthor").forward(request, response);
+                    break;
+                    
+                }
                 authorFacade.create(author);
-                request.getRequestDispatcher("addAuthor.jsp").forward(request, response);
+                request.getRequestDispatcher("/addAuthor").forward(request, response);
                 break;
+                
             case "/addBook":
-                
-                
+                request.setAttribute("activeAddAuthor", true);
+                List<Author> authors = authorFacade.findAll();
+                request.setAttribute("authors", authors);
+                request.getRequestDispatcher("/WEB-INF/addBook.jsp").forward(request, response);
                 break;
+                
             case "/createBook":
-                
-                
+                String bookName = request.getParameter("bookName");
+                String[] authorsId = request.getParameterValues("authorsId");
+                String releaseYear = request.getParameter("releaseYear");
+                String quantity = request.getParameter("quantity");
+                if("".equals(bookName) || "".equals(releaseYear) || "".equals(quantity)){
+                    request.setAttribute("bookName", bookName);
+                    request.setAttribute("releaseYear", releaseYear);
+                    request.setAttribute("quantity", quantity);
+                    request.setAttribute("info", "Заполните все поля");
+                    request.getRequestDispatcher("/addBook").forward(request, response);
+                    break;
+                }
+                if(authorsId == null || authorsId.length == 0){
+                    request.setAttribute("bookName", bookName);
+                    request.setAttribute("releaseYear", releaseYear);
+                    request.setAttribute("quantity", quantity);
+                    request.setAttribute("info", "Выберите авторов");
+                    request.getRequestDispatcher("/addBook").forward(request, response);
+                    break;
+                }
+                Book book = new Book();
+                book.setBookName(bookName);
+                List<Author> listAuthors = new ArrayList<>();
+                for (int i = 0; i < authorsId.length; i++) {
+                    listAuthors.add(authorFacade.find(Long.parseLong(authorsId[i])));
+                }
+                book.setAuthors(listAuthors);
+                try {
+                    book.setReleaseYear(Integer.parseInt(releaseYear));
+                    book.setQuantity(Integer.parseInt(quantity));
+                } catch (Exception e) {
+                    request.setAttribute("bookName", bookName);
+                    request.setAttribute("releaseYear", releaseYear);
+                    request.setAttribute("quantity", quantity);
+                    request.setAttribute("info", "Год публикации и количество вводите цифрами");
+                    request.getRequestDispatcher("/addBook").forward(request, response);
+                    break;
+                }
+                book.setCount(book.getQuantity());
+                bookFacade.create(book);
+                request.setAttribute("info", "Книга добавлена");
+                request.getRequestDispatcher("/listBooks").forward(request, response);
                 break;
-            case "listBooks":
                 
-                
+            case "/listBooks":
+                List<Book> books = bookFacade.findAll();
+                request.setAttribute("books", books);
+                request.getRequestDispatcher("/listBooks.jsp").forward(request, response);
                 break;
+                
+
         }
-        List<Book> books = bookFacade.findAll();
-        request.setAttribute("books", books);
-        request.getRequestDispatcher("/listBooks.jsp").forward(request, response);
+
+
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

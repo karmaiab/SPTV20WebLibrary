@@ -1,27 +1,20 @@
-<%-- 
-    Document   : listBooks
-    Created on : Feb 1, 2022, 2:25:06 PM
-    Author     : user
---%>
 
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Список книг</title>
-    </head>
-    <body>
-        <h1>Список книг</h1>
-        <select name="listBooks" multiple="true">
-            <c:forEach var="book" items="${books}">
-                <option value="${book.id}">${book.bookName}. ${book.releaseYear}. 
-                    <c:forEach var="author" items="${book.authors}">
-                        ${author.firstName} ${author.lastName}.
-                    </c:forEach>
-                </option>
-            </c:forEach>
-        </select>
-    </body>
-</html>
+<h1 class="w-100 text-center my-5">Список книг</h1>
+<div class="w-100 d-flex justify-content-center">
+    <c:forEach var="book" items="${books}">
+        <div class="card m-2" style="width: 10rem;">
+          <div class="card-body">
+            <h5 class="card-title">${book.bookName}</h5>
+            <p class="card-text">
+                <c:forEach var="author" items="${book.authors}">
+                    ${author.firstName} ${author.lastName}.
+                </c:forEach>
+            </p>
+            <p class="card-text">${book.releaseYear}</p>
+            <p class="card-text">${book.count} шт.</p>
+          </div>
+        </div>
+    </c:forEach>
+</div>
