@@ -5,6 +5,7 @@
  */
 package servlets;
 
+import entity.Author;
 import entity.Book;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,6 +16,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import session.AuthorFacade;
 import session.BookFacade;
 
 /**
@@ -22,9 +24,14 @@ import session.BookFacade;
  * @author user
  */
 @WebServlet(name = "MyServlet", urlPatterns = {
+    "/addAuthor",
+    "/createAuthor",
+    "/addBook",
+    "/createBook",
     "/listBooks"
 })
 public class MyServlet extends HttpServlet {
+    @EJB private AuthorFacade authorFacade;
     @EJB private BookFacade bookFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -39,6 +46,47 @@ public class MyServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
+        String path = request.getServletPath();
+        switch (path){
+            case "/addAuthor":
+                
+                request.getRequestDispatcher("/WEB-INF/addAuthor.jsp").forward(request, response);
+                break;
+            case "/createAuthor":
+                String firstName = request.getParameter("firstName");
+                String lastName = request.getParameter("lastName");
+                String birthYear = request.getParameter("birthYear");
+                if ("".equals(firstName)
+                        || lastName.isEmpty()
+                        || birthYear.isEmpty()) {
+                    request.setAttribute("firstName", firstName);
+                    request.setAttribute("lastName", lastName);
+                    request.setAttribute("birthYear", birthYear);
+                    request.setAttribute("info", "Year of birth with numbers");
+                request.getRequestDispatcher("addAuthor.jsp").forward(request, response);
+                break;
+                    
+                }
+                Author author = new Author();
+                author.setFirstName(firstName);
+                author.setLastName(lastName);
+                author.setBirthYear(Integer.parseInt(birthYear));
+                authorFacade.create(author);
+                request.getRequestDispatcher("addAuthor.jsp").forward(request, response);
+                break;
+            case "/addBook":
+                
+                
+                break;
+            case "/createBook":
+                
+                
+                break;
+            case "listBooks":
+                
+                
+                break;
+        }
         List<Book> books = bookFacade.findAll();
         request.setAttribute("books", books);
         request.getRequestDispatcher("/listBooks.jsp").forward(request, response);
